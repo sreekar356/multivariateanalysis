@@ -1,0 +1,20 @@
+data <- read.csv("Intention.csv")
+str(data)
+View(data)
+data$Revenue <- as.factor(data$Revenue)
+library(caret)
+split <- floor(0.66*nrow(data))
+set.seed(123)
+sample<- sample(seq_len(nrow(data)),size = split)
+train <-data[sample,] 
+test <- data[-sample,]
+control <- trainControl(method = "cv" , summaryFunction = twoClassSummary , classProbs = T ,savePredictions = T )
+model_log <- train(Revenue~.,method = 'glm', data = train ,trControl = control)
+predict <- predict(model_log,test,type = 'raw')
+CM_log <- table(predict,test$Revenue,dnn = c('Predicted','Actual'))
+confusionMatrix(CM_log)
+
+model_lda <- train(Revenue~.,method = 'lda', data = train ,trControl = control)
+predict1 <- predict(model_lda,test,type = 'raw')
+CM_lda <- table(predict,test$Revenue,dnn = c('Predicted','Actual'))
+confusionMatrix(CM_lda)
